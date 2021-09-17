@@ -2539,6 +2539,9 @@ typedef int32_t target_timer_t;
                                 - TARGET_SIGEV_PREAMBLE_SIZE) \
                                / sizeof(int32_t))
 
+
+typedef union sigval sigval_t;
+
 struct target_sigevent {
     target_sigval_t sigev_value;
     int32_t sigev_signo;

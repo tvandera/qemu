@@ -53,8 +53,17 @@ expand-objs = $(strip $(sort $(filter %.o,$1)) \
                   $(foreach o,$(filter %.mo,$1),$($o-objs)) \
                   $(filter-out %.o %.mo,$1))
 
-%.ll: %.c
-	$(call quiet-command,$(CLANG) -Xclang -disable-O0-optnone -DLLVM_HELPERS -Wno-unknown-warning-option -S -emit-llvm $(QEMU_INCLUDES) $(QEMU_CFLAGS) $(CFLAGS) $($@-cflags) -g -Wno-unused-function -Wno-unused-variable -Wno-unused-label -O0 -c -o $@ $<,"  CC.LL $(TARGET_DIR)$@")
+
+LINUX_HEADERS_INCLUDES = -I$(ORCHESTRA_ROOT)/$(LLVM_TARGET_ARCH)-unknown-linux-musl/usr/include
+
+CLANG_CMDLINE = $(CLANG) -Xclang -disable-O0-optnone -DLLVM_HELPERS -Wno-unknown-warning-option -S -emit-llvm \
+     $(QEMU_INCLUDES) $(QEMU_CFLAGS) $(CFLAGS) -g -Wno-unused-function -Wno-unused-variable \
+     -Wno-unused-label -O0 -c --target=$(LLVM_TARGET_ARCH)-linux-unknown-musl -v \
+     $($@-cflags) $(LINUX_HEADERS_INCLUDES) 
+
+$(LLVM_TARGET_ARCH)/%.ll: %.c
+	mkdir -p $(dir $@)
+	$(call quiet-command,$(CLANG_CMDLINE)-o $@ $<,"  CC.LL $(TARGET_DIR)$@")
 
 %.o: %.c
 	$(call quiet-command,$(CC) $(QEMU_INCLUDES) $(QEMU_CFLAGS) $(QEMU_DGFLAGS) $(CFLAGS) $($@-cflags) -c -o $@ $<,"  CC    $(TARGET_DIR)$@")

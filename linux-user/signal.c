@@ -83,8 +83,10 @@ static uint8_t host_to_target_signal_table[_NSIG] = {
        host libpthread signals.  This assumes no one actually uses SIGRTMAX :-/
        To fix this properly we need to do manual signal delivery multiplexed
        over a single host signal.  */
+#ifdef __SIGRTMAX 
     [__SIGRTMIN] = __SIGRTMAX,
     [__SIGRTMAX] = __SIGRTMIN,
+#endif
 };
 static uint8_t target_to_host_signal_table[_NSIG];
 

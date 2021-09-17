@@ -34,7 +34,8 @@ PROGS_INSTALL_DIR := $(libdir)
 endif
 
 ifdef CONFIG_LLVM_HELPERS
-LLVM_HELPERS=libtinycode-helpers-$(TARGET_NAME).bc
+LLVM_TARGET_ARCHS=x86_64 riscv64
+LLVM_HELPERS=$(foreach T,$(LLVM_TARGET_ARCHS),libtinycode-helpers-$(TARGET_NAME)-$(T).bc)
 endif
 
 else
@@ -220,11 +221,32 @@ ifdef CONFIG_DARWIN
 endif
 
 ifdef CONFIG_LLVM_HELPERS
+
+ifdef LLVM_TARGET_ARCH
+
 ll-y := target-$(TARGET_BASE_ARCH)/ linux-user/
 ll-y += fpu/softfloat.ll thunk.ll util/cutils.ll util/crc32c.ll util/getauxval.ll util/rcu.ll util/qemu-thread-posix.ll
 dummy := $(call unnest-vars,,ll-y)
-$(LLVM_HELPERS): $(ll-y)
+arch-ll-y = $(addprefix $(LLVM_TARGET_ARCH)/,$(ll-y))
+
+LLVM_HELPER=libtinycode-helpers-$(TARGET_NAME)-$(LLVM_TARGET_ARCH).bc
+
+$(LLVM_HELPER): $(arch-ll-y)
 	$(call quiet-command,$(LLVM_LINK) -o $@ $^,"  LINK.BC $@")
+
+.PHONY: llvm_helper
+llvm_helper: $(LLVM_HELPER)
+
+else
+
+$(LLVM_HELPERS): 
+	$(call quiet-command, \
+	  for T in $(LLVM_TARGET_ARCHS); do \
+		$(MAKE) BUILD_DIR=$(BUILD_DIR) TARGET_DIR=$(TARGET_DIR) LLVM_TARGET_ARCH=$$T llvm_helper; \
+	  done, "  MAKE $@" \
+	)
+
+endif
 endif
 
 gdbstub-xml.c: $(TARGET_XML_FILES) $(SRC_PATH)/scripts/feature_to_c.sh
