@@ -1,0 +1,21 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ master develop ]
+  pull_request:
+    branches: [ master develop ]
+
+jobs:
+  build:
+
+    runs-on: [ self-hosted ]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: conda
+      run: conda activate dbt
+    - name: configure
+      run: mkdir build && cd build && ../configure --target-list=arm-linux-user --disable-werror --python=/usr/bin/python2 --without-pixman --disable-tools --disable-system
+    - name: make
+      run: cd build && make -j `nproc`
