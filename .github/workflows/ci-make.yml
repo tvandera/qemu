@@ -17,8 +17,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: conda
-      run: conda activate dbt
+    - name: conda activate dbt
+      run: $(CONDA_EXE)/bin/conda activate dbt
     - name: configure
       run: mkdir build && cd build && ../configure --target-list=arm-linux-user --disable-werror --python=/usr/bin/python2 --without-pixman --disable-tools --disable-system
     - name: make
