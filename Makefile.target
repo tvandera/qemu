@@ -268,9 +268,11 @@ endif
 
 install: all
 ifdef CONFIG_LLVM_HELPERS
+	mkdir -p "$(DESTDIR)$(libdir)"
 	$(INSTALL_LIB) $(LLVM_HELPERS) "$(DESTDIR)$(libdir)"
 endif
 ifdef CONFIG_LIBTINYCODE
+	mkdir -p "$(DESTDIR)$(includedir)"
 	$(INSTALL_DATA) $(SRC_PATH)/tcg/tcg-opc.h $(SRC_PATH)/linux-user/ptc.h "$(DESTDIR)$(includedir)"
 endif
 ifneq ($(PROGS),)
