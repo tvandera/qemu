@@ -1,0 +1,25 @@
+name: CI-compile
+
+on:
+  push:
+    branches: 
+    - master
+    - develop
+  pull_request:
+    branches:
+    - master
+    - develop
+
+jobs:
+  build:
+
+    runs-on: [ self-hosted ]
+
+    steps:
+    - uses: actions/checkout@v2
+#    - name: conda activate dbt
+#      run: /home/vanmeerb/opt/conda3/bin/activate dbt
+    - name: configure Qemu
+      run: mkdir build && cd build && ../configure --target-list=arm-linux-user --disable-werror --python=/usr/bin/python2 --without-pixman --disable-tools --disable-system
+    - name: compile Qemu
+      run: cd build && make -j `nproc`
